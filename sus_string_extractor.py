@@ -22,8 +22,9 @@ def extract_usefull_strings(file_name):
     dir_pattern = r"^C:([a-zA-Z0-9/\\_-]+).(\W+)"
     # files (random files (only name and/or relative path)) 
     file_pattern = r"^([a-zA-Z0-9_-]+)([.]{1})([a-zA-Z]+)"
-    # xml like format 
-    xml_pattern = r"^<([a-zA-Z0-9=_ -/!:{}*.;\"']+)>$"
+    # xml like format [a-zA-Z0-9=_ -/!:{}*.;\"']+   ^<(\W+) ([A-Za-z0-9_]+)=([A-Za-z0-9_\"-]+) ([/]{0,1})>$
+    # beginning -> r"<([^ >!\/]+)[^>]*>"
+    xml_pattern = r"<([^ >!\/]+)[^>]*>"
     # user agent pattern
     user_agent_pattern = r"([A-Za-z0-9_ @]*)([A-Za-z]{4,8})/([0-9.]{3,6})"
     # ip address pattern
@@ -45,7 +46,7 @@ def extract_usefull_strings(file_name):
     golang_list = list()
 
     # open file handler
-    f = open("strings.txt","r")
+    f = open(file_name,"r")
 
     # iterate over all the lines in the file and compare with every pattern
     for line in f:
@@ -70,6 +71,7 @@ def extract_usefull_strings(file_name):
         else:
             continue
 
+    print(xml_list)
     return {
         "wannacry_language":language_list,
         "directories":dir_list,
@@ -93,7 +95,7 @@ def show_findings(patterns):
 
 def write_output_file(patterns,output_file,decode,verbose):
     """
-    Receibes and output file as argument and 
+    Receibes and output file as argument and writes the found patters into it separated into sections.
     """
     if decode and len(patterns["base64"]) > 0:
         print(colored("[*] Will attempt to decode base64 possible ocurrences.","blue"))
