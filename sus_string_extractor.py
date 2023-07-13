@@ -1,7 +1,10 @@
+#!/usr/bin/python3
+
 import re
 from base64 import b64decode
 from termcolor import colored
 import time 
+from argparse import ArgumentParser,Namespace
 
 def extract_usefull_strings(file_name):    
     """
@@ -78,16 +81,23 @@ def extract_usefull_strings(file_name):
         "base64":base64_list,
         "golang_indicators":golang_list
     }
+
 def show_findings(patterns):
+    """
+    Print the findings dictionary in case the verbose flag is active.
+    """
     for pattern,ocurrences in patterns.items():
         if len(ocurrences) > 0:
             print(colored(f"[+] Found {len(ocurrences)} possible ocurrences of {pattern}","green"))
-            time.sleep(3)
+            time.sleep(1)
 
 def write_output_file(patterns,output_file,decode,verbose):
+    """
+    Receibes and output file as argument and 
+    """
     if decode and len(patterns["base64"]) > 0:
         print(colored("[*] Will attempt to decode base64 possible ocurrences.","blue"))
-        time.sleep(3)
+        time.sleep(2)
     with open(output_file,"w") as f:
         for pattern,ocurrences in patterns.items():
             if len(ocurrences) > 0:
@@ -111,10 +121,19 @@ def write_output_file(patterns,output_file,decode,verbose):
 
 
 if __name__ == '__main__':
-    input_file = "strings.txt"
-    output_file = "classified_strings.txt"
-    decode = True
-    verbose = True
+
+    # instance the parser
+    parser = ArgumentParser()
+    parser.add_argument("-i","--input_file",help="Name of the strings input text file (default: \"strings.txt\")",type=str,default="strings.txt",nargs="?")
+    parser.add_argument("-o","--output_file",help="Name of the classified usefull strings' output text file (default: \"classified_strings.txt\")",type=str,default="classified_strings.txt",nargs="?")
+    parser.add_argument("-v","--verbose",help="If the flag is used, it provides a more verbose output.",action="store_true")
+    parser.add_argument("-d","--decode",help="If the flag is used, it the program will try to decode any potential base64 string it might find.",action="store_true")
+    args: Namespace = parser.parse_args()
+
+    input_file = args.input_file
+    output_file = args.output_file
+    decode = args.decode
+    verbose = args.verbose
 
     # extract the classified patterns 
     patterns_classified = extract_usefull_strings(input_file)
