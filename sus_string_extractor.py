@@ -17,13 +17,12 @@ def extract_usefull_strings(file_name):
     # pattern particular for wannacry
     language_pattern = r"^msg/m_([a-z]+).wnry"
     # urls
-    url_pattern = r"^http://([a-zA-Z0-9._-]).([a-zA-Z0-9_-])"
-    # directories (windows) 
-    dir_pattern = r"^C:([a-zA-Z0-9/\\_-]+).(\W+)"
+    url_pattern = r"([@]{0,1})http://([a-zA-Z0-9_/.-=?]).([a-zA-Z0-9_-])"
+    # directories (windows)
+    dir_pattern = r"@*((c:|C:)|[A-Za-z0-9_ ]{3,})((/|\\)([A-Za-z0-9_ ]{4,8})(.?[a-zA-Z0-9_.]{2,}))+"
     # files (random files (only name and/or relative path)) 
-    file_pattern = r"^([a-zA-Z0-9_-]+)([.]{1})([a-zA-Z]+)"
+    file_pattern = r"^(@(/|\\)|.(/|\\))?([a-zA-Z0-9_-]+)([.]{1})([a-zA-Z]+)$"
     # xml like format [a-zA-Z0-9=_ -/!:{}*.;\"']+   ^<(\W+) ([A-Za-z0-9_]+)=([A-Za-z0-9_\"-]+) ([/]{0,1})>$
-    # beginning -> r"<([^ >!\/]+)[^>]*>"
     xml_pattern = r"<([^ >!\/]+)[^>]*>"
     # user agent pattern
     user_agent_pattern = r"([A-Za-z0-9_ @]*)([A-Za-z]{4,8})/([0-9.]{3,6})"
@@ -32,7 +31,11 @@ def extract_usefull_strings(file_name):
     # possible base 64 pattern
     base64_pattern = r"[a-zA-Z0-9+/,=]{40,}"
     # golang indicators
-    golang_pattern = r"^golang.org([A-Za-z0-9/.()*]+)"
+    golang_pattern = r"(g|G)o(lang)?"
+    # nim indicators 
+    nim_pattern = r"^(\w{4,}|@)[\w]+.(N|n)im[.A-Za-z\(_\,\)0-9]?"
+    # github pattern
+    github_pattern = r"(g|G)it(hub)?(.(com|org))?"
 
     # lists to store findings
     language_list = list()
@@ -44,6 +47,8 @@ def extract_usefull_strings(file_name):
     ip_address_list = list()
     base64_list = list()
     golang_list = list()
+    nim_list = list()
+    github_list = list()
 
     # open file handler
     f = open(file_name,"r")
@@ -56,8 +61,8 @@ def extract_usefull_strings(file_name):
             url_list.append(line)
         elif re.match(dir_pattern,line):
             dir_list.append(line)
-        elif re.match(file_pattern,line):
-            file_list.append(line)
+        elif re.match(github_pattern,line):
+            github_list.append(line)
         elif re.match(xml_pattern,line):
             xml_list.append(line)
         elif re.match(user_agent_pattern,line):
@@ -68,10 +73,13 @@ def extract_usefull_strings(file_name):
             base64_list.append(line)
         elif re.match(golang_pattern,line):
             golang_list.append(line)
+        elif re.match(nim_pattern,line):
+            nim_list.append(line)
+        elif re.match(file_pattern,line):
+            file_list.append(line)
         else:
             continue
 
-    print(xml_list)
     return {
         "wannacry_language":language_list,
         "directories":dir_list,
@@ -81,7 +89,9 @@ def extract_usefull_strings(file_name):
         "user_agents":user_agent_list,
         "ip_addresses":ip_address_list,
         "base64":base64_list,
-        "golang_indicators":golang_list
+        "golang_indicators":golang_list,
+        "nim_indicators":nim_list,
+        "github_indicators":github_list
     }
 
 def show_findings(patterns):
@@ -119,7 +129,7 @@ def write_output_file(patterns,output_file,decode,verbose):
             else:
                 continue
     f.close() 
-    print(colored(f"[+] The findings have beed written to {output_file}.","green"))
+    print(colored(f"[+] The findings have beed written to {output_file}.","blue"))
 
 
 if __name__ == '__main__':

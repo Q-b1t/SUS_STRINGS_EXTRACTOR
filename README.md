@@ -1,13 +1,15 @@
 # SUS STRING EXTRACTOR
 **It is recomended to run this script inside a virtual environment in order to install the required dependencies.**
 Prototype for a command line interface for further analysing text files containing strings extracted from malware samples. The idea is to symplify malware analysis. The strings that are searched for are patterns belonging to the following categories:
-- Wanacry Language Indicators
+- Wanacry Indicators
 - Windows Directories
 - URLs
 - Binaries & Executables
 - Possible base 64 strings (there is an option to decode the strings if found)
 - IP Addresses
 - Calls to golang's API 
+- Indicators of programs compiled in Nim
+- Possible requests to github repositories
 - Known malitious addresses
 Any pattern if finds will be written to ```classified_strings.txt``` by default. This option can be changed with the corresponding flag (```-o```). Similary, by default, the input file must be named ```strings.txt```, and this can be changed using the flag ```-i```.
 
